@@ -7,31 +7,29 @@ import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
-
 @Component
 public class PrivateKeyLoader {
 
-    private final Dotenv dotenv = Dotenv.configure()
-            .directory("./")
-            .ignoreIfMissing()
-            .load();
+    private final String privateKeyStr;
+
+    public PrivateKeyLoader() {
+
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .load();   // ✅ auto reads from project root
+
+        this.privateKeyStr = dotenv.get("PRIVATE_KEY");
+
+        System.out.println("DEBUG PRIVATE_KEY = " + privateKeyStr);
+
+        if (privateKeyStr == null || privateKeyStr.isEmpty()) {
+            throw new RuntimeException("❌ PRIVATE_KEY missing in .env file");
+        }
+    }
 
     public PrivateKey getPrivateKey() throws Exception {
-
-        String key = dotenv.get("PRIVATE_KEY");
-
-        System.out.println("KEY = " + key); // debug
-
-        if (key == null) {
-            throw new RuntimeException("❌ PRIVATE_KEY not found in .env");
-        }
-
-        byte[] decoded = Base64.getDecoder().decode(key);
-
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(decoded);
-
-        KeyFactory factory = KeyFactory.getInstance("RSA");
-
-        return factory.generatePrivate(spec);
+        byte[] keyBytes = Base64.getDecoder().decode(privateKeyStr);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        return KeyFactory.getInstance("RSA").generatePrivate(spec);
     }
 }

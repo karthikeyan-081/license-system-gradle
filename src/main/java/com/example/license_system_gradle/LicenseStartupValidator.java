@@ -18,6 +18,7 @@ public class LicenseStartupValidator {
     }
 
     @EventListener(ApplicationReadyEvent.class)
+    @Scheduled(fixedRate = 2 * 60 * 60 * 1000)
     public void validateOnStartup() {
 
         boolean valid = licenseService.validateLicense();
@@ -28,21 +29,5 @@ public class LicenseStartupValidator {
 
         log.info("🚀 License verified at startup");
     }
-    @Scheduled(fixedRate = 2 * 60 * 60 * 1000)
-    public void checkLicensePeriodically() {
 
-        log.info("🔍 Running scheduled license check...");
-
-        boolean valid = licenseService.validateLicense();
-
-        if (!valid) {
-            log.error("❌ License invalid - system should stop or restrict access");
-
-            // You can choose behavior:
-            // Option 1: stop app
-            throw new RuntimeException("❌ License invalid during runtime");
-        }
-
-        log.info("✅ License still valid");
-    }
 }

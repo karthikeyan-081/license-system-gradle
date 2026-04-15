@@ -1,6 +1,6 @@
 
-.env
-src/main/resources/license.json
+../.env
+
 
 HELP.md
 .gradle
